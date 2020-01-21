@@ -8,15 +8,16 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.ColorInt
 
-class ColoredCircles(context: Context?, attrs: AttributeSet?, xPositionForCircle: Float, yPositionForCircle: Float, color: Int) : View(context, attrs) {
+class ColoredCircles(context: Context?, attrs: AttributeSet?, xPositionForCircle: Float, yPositionForCircle: Float, color: Int, randomNumber:Int) : View(context, attrs) {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var circleColor = color
+    var circleColor = color
+    var circleColorRandomNumber :Int = randomNumber
     private var borderColor = Color.YELLOW
     private var borderWidth = 5.0f
     private var size = 150
-    private var xPositionForCircle = xPositionForCircle
-    private var yPositionForCircle = yPositionForCircle
+    var xPositionForCircle = xPositionForCircle
+    var yPositionForCircle = yPositionForCircle
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

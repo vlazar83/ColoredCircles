@@ -16,16 +16,19 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     protected lateinit var frameLayout: ViewGroup
     protected var DEFAULT_ANIMATION_DURATION = 2500L
-    val colorsAlreadyTaken = mutableSetOf(-1)
+    val randomNumbersAlreadyTaken = mutableSetOf(-1)
+    val generatedCircleViews: MutableList<ColoredCircles> = mutableListOf<ColoredCircles>()
     val random = Random()
     var generatedCircles = 0
+    var lastRandomNumber = -1
 
     fun rand(from: Int, to: Int) : Int {
         var randomNum = -100
         do {
             randomNum = random.nextInt(to - from) + from
-        } while (colorsAlreadyTaken.contains(randomNum))
-        colorsAlreadyTaken.add(randomNum)
+        } while (randomNumbersAlreadyTaken.contains(randomNum))
+        randomNumbersAlreadyTaken.add(randomNum)
+        lastRandomNumber = randomNum
         return randomNum
     }
 
@@ -52,7 +55,8 @@ class MainActivity : AppCompatActivity() {
                             6 -> generatedColor = Color.CYAN
                             7 -> generatedColor = Color.MAGENTA
                         }
-                        val coloredCircles = ColoredCircles( this, null, motionEvent.getX(), motionEvent.getY(), generatedColor)
+                        val coloredCircles = ColoredCircles( this, null, motionEvent.getX(), motionEvent.getY(), generatedColor, lastRandomNumber)
+                        generatedCircleViews.add(coloredCircles)
                         generatedCircles++
                         frameLayout.addView(coloredCircles)
 
@@ -68,7 +72,22 @@ class MainActivity : AppCompatActivity() {
                         onStartAnimation(coloredCircles)
                     }
                 }
+
                 MotionEvent.ACTION_UP -> {
+
+                    // search for the circle which needs to be erased upon releasing the touch (20 px tolerance)
+                    for(circle in generatedCircleViews){
+                        if( (circle.xPositionForCircle + 20 >= motionEvent.getX() && circle.xPositionForCircle - 20 <= motionEvent.getX()) &&
+                            (circle.yPositionForCircle + 20 >= motionEvent.getY() && circle.yPositionForCircle - 20 <= motionEvent.getY())){
+                                circle.clearAnimation()
+                                frameLayout.removeView(circle)
+                                randomNumbersAlreadyTaken.remove(circle.circleColorRandomNumber)
+                                generatedCircles--
+                                generatedCircleViews.remove(circle)
+                                break
+                        }
+                    }
+
 
                 }
             }

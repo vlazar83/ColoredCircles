@@ -12,8 +12,8 @@ class ColoredCircles(context: Context?, attrs: AttributeSet?, xPositionForCircle
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var circleColor = color
-    private var borderColor = Color.BLACK
-    private var borderWidth = 4.0f
+    private var borderColor = Color.YELLOW
+    private var borderWidth = 5.0f
     private var size = 150
     private var xPositionForCircle = xPositionForCircle
     private var yPositionForCircle = yPositionForCircle

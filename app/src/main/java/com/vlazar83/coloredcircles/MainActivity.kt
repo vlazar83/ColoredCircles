@@ -39,61 +39,87 @@ class MainActivity : AppCompatActivity() {
         frameLayout = findViewById(R.id.container)
         frameLayout.setBackgroundColor(Color.BLACK)
         frameLayout.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-            when (motionEvent.action){
-                MotionEvent.ACTION_DOWN -> {
-
-                    // generate up to 8 circles max
-                    if(generatedCircles<8){
-                        var generatedColor = Color.WHITE
-                        when (rand(0,8)) {
-                            0 -> generatedColor = Color.WHITE
-                            1 -> generatedColor = Color.DKGRAY
-                            2 -> generatedColor = Color.RED
-                            3 -> generatedColor = Color.GREEN
-                            4 -> generatedColor = Color.BLUE
-                            5 -> generatedColor = Color.YELLOW
-                            6 -> generatedColor = Color.CYAN
-                            7 -> generatedColor = Color.MAGENTA
-                        }
-                        val coloredCircles = ColoredCircles( this, null, motionEvent.getX(), motionEvent.getY(), generatedColor, lastRandomNumber)
-                        generatedCircleViews.add(coloredCircles)
-                        generatedCircles++
-                        frameLayout.addView(coloredCircles)
-
-                        val sizeAnimator = ScaleAnimation(0.8f, 1.1f, 0.8f, 1.1f, Animation.ABSOLUTE, motionEvent.getX(), Animation.ABSOLUTE, motionEvent.getY())
-                        sizeAnimator.setFillAfter(true)
-                        sizeAnimator.repeatMode = ValueAnimator.REVERSE
-                        sizeAnimator.repeatCount = 10
-                        sizeAnimator.setDuration(1000)
-
-                        coloredCircles.startAnimation(sizeAnimator).apply {  }
-
-
-                        onStartAnimation(coloredCircles)
-                    }
-                }
-
-                MotionEvent.ACTION_UP -> {
-
-                    // search for the circle which needs to be erased upon releasing the touch (20 px tolerance)
-                    for(circle in generatedCircleViews){
-                        if( (circle.xPositionForCircle + 20 >= motionEvent.getX() && circle.xPositionForCircle - 20 <= motionEvent.getX()) &&
-                            (circle.yPositionForCircle + 20 >= motionEvent.getY() && circle.yPositionForCircle - 20 <= motionEvent.getY())){
-                                circle.clearAnimation()
-                                frameLayout.removeView(circle)
-                                randomNumbersAlreadyTaken.remove(circle.circleColorRandomNumber)
-                                generatedCircles--
-                                generatedCircleViews.remove(circle)
-                                break
-                        }
-                    }
-
-
-                }
-            }
+            handleTouch(motionEvent)
+            true
             return@OnTouchListener true
         })
 
+    }
+
+    private var mActivePointerId: Int = 0
+
+    private fun handleTouch(m: MotionEvent)
+    {
+        val pointerCount = m.pointerCount
+
+        for (i in 0 until pointerCount)
+        {
+            mActivePointerId = m.getPointerId(i)
+
+            val (x: Float, y: Float) = m.findPointerIndex(mActivePointerId).let { pointerIndex ->
+                // Get the pointer's current position
+                m.getX(pointerIndex) to m.getY(pointerIndex)
+            }
+
+            val action = m.actionMasked
+            val actionIndex = m.actionIndex
+
+            when (action)
+            {
+                MotionEvent.ACTION_DOWN -> doTheDrawing(x,y)
+                //MotionEvent.ACTION_UP -> eraseCircle(m)
+                MotionEvent.ACTION_POINTER_DOWN -> doTheDrawing(x,y)
+                //MotionEvent.ACTION_POINTER_UP -> eraseCircle(m)
+                //MotionEvent.ACTION_MOVE -> doTheDrawing(x,y)
+            }
+        }
+
+    }
+
+    fun eraseCircle(motionEvent:MotionEvent){
+        // search for the circle which needs to be erased upon releasing the touch (20 px tolerance)
+        for(circle in generatedCircleViews){
+            if( (circle.xPositionForCircle + 20 >= motionEvent.getX() && circle.xPositionForCircle - 20 <= motionEvent.getX()) &&
+                (circle.yPositionForCircle + 20 >= motionEvent.getY() && circle.yPositionForCircle - 20 <= motionEvent.getY())){
+                circle.clearAnimation()
+                frameLayout.removeView(circle)
+                randomNumbersAlreadyTaken.remove(circle.circleColorRandomNumber)
+                generatedCircles--
+                generatedCircleViews.remove(circle)
+                break
+            }
+        }
+    }
+    fun doTheDrawing(x:Float, y:Float){
+        // generate up to 8 circles max
+        if(generatedCircles<8){
+            var generatedColor = Color.WHITE
+            when (rand(0,8)) {
+                0 -> generatedColor = Color.WHITE
+                1 -> generatedColor = Color.DKGRAY
+                2 -> generatedColor = Color.RED
+                3 -> generatedColor = Color.GREEN
+                4 -> generatedColor = Color.BLUE
+                5 -> generatedColor = Color.YELLOW
+                6 -> generatedColor = Color.CYAN
+                7 -> generatedColor = Color.MAGENTA
+            }
+            val coloredCircles = ColoredCircles( this, null, x, y, generatedColor, lastRandomNumber)
+            generatedCircleViews.add(coloredCircles)
+            generatedCircles++
+            frameLayout.addView(coloredCircles)
+
+            val sizeAnimator = ScaleAnimation(0.8f, 1.1f, 0.8f, 1.1f, Animation.ABSOLUTE, x, Animation.ABSOLUTE, y)
+            sizeAnimator.setFillAfter(true)
+            sizeAnimator.repeatMode = ValueAnimator.REVERSE
+            sizeAnimator.repeatCount = 10
+            sizeAnimator.setDuration(1000)
+
+            coloredCircles.startAnimation(sizeAnimator).apply {  }
+
+
+            onStartAnimation(coloredCircles)
+        }
     }
 
     protected fun onStartAnimation(coloredCircles: ColoredCircles){

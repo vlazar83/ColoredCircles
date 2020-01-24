@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     val random = Random()
     var generatedCircles = 0
     var lastRandomNumber = -1
+    var timerStarted = false
+    var startTimer = false
 
     fun rand(from: Int, to: Int) : Int {
         var randomNum = -100
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         frameLayout = findViewById(R.id.container)
         frameLayout.setBackgroundColor(Color.BLACK)
         frameLayout.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+            startTimer = true
             handleTouch(motionEvent)
             true
             return@OnTouchListener true
@@ -50,6 +53,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleTouch(m: MotionEvent)
     {
+        if(startTimer && !timerStarted){
+            timerStarted = true
+            startTimerAndSound()
+        }
         val pointerCount = m.pointerCount
 
         for (i in 0 until pointerCount)
@@ -76,6 +83,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun startTimerAndSound(){
+        var timer = Timer()
+        timer.startTimer()
+        timer.startSound(frameLayout.context)
+    }
+
     fun eraseCircle(motionEvent:MotionEvent){
         // search for the circle which needs to be erased upon releasing the touch (20 px tolerance)
         for(circle in generatedCircleViews){
@@ -90,6 +103,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     fun doTheDrawing(x:Float, y:Float){
         // generate up to 8 circles max
         if(generatedCircles<8){
